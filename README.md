@@ -56,12 +56,13 @@ streamlit run main.py
 
 ## Build with Docker
 
-Run the following commands to build and run the Docker image.
+Add the OPENAI env variable to docker-compose.yml
+Then run the following commands to build and run the Docker image
 
 ```bash
 cd knowledge_gpt
 docker build -t knowledge_gpt .
-docker run -p 8501:8501 knowledge_gpt
+docker compose -up
 ```
 
 Open http://localhost:8501 in your browser to access the app.
