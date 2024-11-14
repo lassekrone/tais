@@ -13,6 +13,9 @@ notebooks/
 # TODO
 TODO.md
 
+# Docker
+docker-compose.yml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

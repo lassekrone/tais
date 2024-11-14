@@ -15,7 +15,7 @@ from knowledge_gpt.core.caching import bootstrap_caching
 from knowledge_gpt.core.parsing import read_file
 from knowledge_gpt.core.chunking import chunk_file
 from knowledge_gpt.core.embedding import embed_files
-from knowledge_gpt.core.qa import query_folder
+from knowledge_gpt.core.qa import query_folder, query_requirements
 from knowledge_gpt.core.utils import get_llm
 
 from dotenv import load_dotenv
@@ -34,7 +34,7 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 
 
 st.set_page_config(page_title="T(AI)S", page_icon="📖", layout="wide")
-st.header("T(AIII)S")
+st.header("T(AI)S")
 
 
 # Enable caching for expensive functions
@@ -73,6 +73,7 @@ if not is_file_valid(file):
 if not is_open_ai_key_valid(openai_api_key, model):
     st.stop()
 
+llm = get_llm(model=model, openai_api_key=openai_api_key, temperature=0)
 
 with st.spinner("Indexing document... This may take a while⏳"):
     folder_index = embed_files(
@@ -81,6 +82,42 @@ with st.spinner("Indexing document... This may take a while⏳"):
         vector_store=VECTOR_STORE if model != "debug" else "debug",
         openai_api_key=openai_api_key,
     )
+    
+    # Get requirements automatically after indexing
+    requirements_result = query_requirements(folder_index=folder_index, llm=llm)
+
+col1, col2, col3 = st.columns(3)
+    
+with col1:
+    st.markdown("### Company")
+    st.markdown(requirements_result.answer)
+    with st.expander("Sources"):
+        for source in requirements_result.sources:
+            st.markdown(source.page_content)
+            formatted_source = source.metadata["source"].split('-')[0]
+            st.markdown('p. ' + formatted_source)
+            st.markdown("---")
+
+with col2:
+    st.markdown("### Summary")
+    st.markdown(requirements_result.answer)
+    with st.expander("Sources"):
+        for source in requirements_result.sources:
+            st.markdown(source.page_content)
+            formatted_source = source.metadata["source"].split('-')[0]
+            st.markdown('p. ' + formatted_source)
+            st.markdown("---")
+
+with col3:
+    st.markdown("### Tender requirements")
+    st.markdown(requirements_result.answer)
+    with st.expander("Sources"):
+        for source in requirements_result.sources:
+            st.markdown(source.page_content)
+            formatted_source = source.metadata["source"].split('-')[0]
+            st.markdown('p. ' + formatted_source)
+            st.markdown("---")
+
 
 with st.form(key="qa_form"):
     query = st.text_area("Ask a question about the document")
@@ -92,23 +129,19 @@ if show_full_doc:
         # Hack to get around st.markdown rendering LaTeX
         st.markdown(f"<p>{wrap_doc_in_html(file.docs)}</p>", unsafe_allow_html=True)
 
-
 if submit:
     if not is_query_valid(query):
-        st.stop()
+        st.stop()    
 
     # Output Columns
     answer_col, sources_col = st.columns(2)
 
-    llm = get_llm(model=model, openai_api_key=openai_api_key, temperature=0)
     result = query_folder(
         folder_index=folder_index,
         query=query,
         return_all=return_all_chunks,
         llm=llm,
     )
-
-    source_pages = ''
 
     
     for source in result.sources:
