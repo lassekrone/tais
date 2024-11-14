@@ -56,6 +56,7 @@ streamlit run main.py
 
 ## Build with Docker
 
+Make sure you have docker installed.
 Add the OPENAI env variable to docker-compose.yml
 Then run the following commands to build and run the Docker image
 
