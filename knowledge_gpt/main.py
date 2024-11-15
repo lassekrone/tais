@@ -69,7 +69,6 @@ chunked_file = chunk_file(file, chunk_size=300, chunk_overlap=0)
 if not is_file_valid(file):
     st.stop()
 
-
 if not is_open_ai_key_valid(openai_api_key, model):
     st.stop()
 
@@ -83,39 +82,63 @@ with st.spinner("Indexing document... This may take a while⏳"):
         openai_api_key=openai_api_key,
     )
     
-    # Get requirements automatically after indexing
-    requirements_result = query_requirements(folder_index=folder_index, llm=llm)
-
-col1, col2, col3 = st.columns(3)
+    company_result = query_folder(
+        query="What company information can you find? Focus on the company's background, capabilities, and relevant experience.",
+        folder_index=folder_index,
+        llm=llm,
+    )
     
-with col1:
-    st.markdown("### Company")
-    st.markdown(requirements_result.answer)
-    with st.expander("Sources"):
-        for source in requirements_result.sources:
-            st.markdown(source.page_content)
-            formatted_source = source.metadata["source"].split('-')[0]
-            st.markdown('p. ' + formatted_source)
-            st.markdown("---")
+    summary_result = query_folder(
+        query="Provide a clear and concise summary of the document's main topic and purpose.",
+        folder_index=folder_index,
+        llm=llm,
+    )
+    
+    requirements_result = query_folder(
+        query="You are a legal expert analyzing an RFP document. Your task is to: \
+            - Extract **all** requirements, including those that are implied or stated indirectly. \
+            - Organize the requirements by their respective topics as structured in the document. \
+            - Present the information in clear, concise bullet points. \
+            - Ensure that no requirement is overlooked. \
+            - If any statements are ambiguous but may contain requirements, please include them and mark them as 'Potential Requirement - Needs Clarification.'",
+        folder_index=folder_index,
+        llm=llm,
+    )
 
-with col2:
-    st.markdown("### Summary")
-    st.markdown(requirements_result.answer)
-    with st.expander("Sources"):
-        for source in requirements_result.sources:
-            st.markdown(source.page_content)
-            formatted_source = source.metadata["source"].split('-')[0]
-            st.markdown('p. ' + formatted_source)
-            st.markdown("---")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("### Company")
+        st.markdown(company_result.answer)
+        # with st.expander("Sources"):
+        #     for source in company_result.sources:
+        #         st.markdown(source.page_content)
+        #         formatted_source = source.metadata["source"].split('-')[0]
+        #         st.markdown('p. ' + formatted_source)
+        #         st.markdown("---")
 
-with col3:
-    st.markdown("### Tender requirements")
-    st.markdown(requirements_result.answer)
-    with st.expander("Sources"):
+    with col2:
+        st.markdown("### Summary")
+        st.markdown(summary_result.answer)
+        # with st.expander("Sources"):
+        #     for source in summary_result.sources:
+        #         st.markdown(source.page_content)
+        #         formatted_source = source.metadata["source"].split('-')[0]
+        #         st.markdown('p. ' + formatted_source)
+        #         st.markdown("---")
+
+    col3, col4 = st.columns(2)
+
+    with col3:
+        st.markdown("### Tender requirements")
+        st.markdown(requirements_result.answer)
+
+    with col4:
+        st.markdown("#### Sources")
         for source in requirements_result.sources:
             st.markdown(source.page_content)
-            formatted_source = source.metadata["source"].split('-')[0]
-            st.markdown('p. ' + formatted_source)
+            formmated_source = source.metadata["source"].split('-')[0]
+            st.markdown('p. ' + formmated_source)
             st.markdown("---")
 
 
@@ -136,26 +159,24 @@ if submit:
     # Output Columns
     answer_col, sources_col = st.columns(2)
 
-    result = query_folder(
-        folder_index=folder_index,
-        query=query,
-        return_all=return_all_chunks,
-        llm=llm,
-    )
-
-    
-    for source in result.sources:
-        formmated_source = source.metadata["source"].split('-')[0]
-        source_pages += formmated_source
+    with st.spinner("Processing your question... ⏳"):
         
-    with answer_col:
-        st.markdown("#### Answer")
-        st.markdown(result.answer + ' - page(s): ' + source_pages)
+        result = query_folder(
+            folder_index=folder_index,
+            query=query,
+            return_all=return_all_chunks,
+            llm=llm,
+        )
 
-    with sources_col:
-        st.markdown("#### Sources")
-        for source in result.sources:
-            st.markdown(source.page_content)
-            formmated_source = source.metadata["source"].split('-')[0]
-            st.markdown('p. ' + formmated_source)
-            st.markdown("---")
+            
+        with answer_col:
+            st.markdown("#### Answer")
+            st.markdown(result.answer)
+
+        with sources_col:
+            st.markdown("#### Sources")
+            for source in result.sources:
+                st.markdown(source.page_content)
+                formmated_source = source.metadata["source"].split('-')[0]
+                st.markdown('p. ' + formmated_source)
+                st.markdown("---")

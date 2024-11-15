@@ -63,21 +63,3 @@ def get_sources(answer: str, folder_index: FolderIndex) -> List[Document]:
             if doc.metadata["source"] in source_keys:
                 source_docs.append(doc)
     return source_docs
-
-def query_requirements(folder_index: FolderIndex, llm: BaseChatModel) -> AnswerWithSources:
-    """Queries the document to understand its main topic and content.
-
-    Args:
-        folder_index (FolderIndex): The folder index to search.
-        llm (BaseChatModel): The language model to use.
-
-    Returns:
-        AnswerWithSources: The document summary and source documents.
-    """
-    summary_query = "What is this document about? Provide a clear and concise summary of its main topic and purpose."
-    return query_folder(
-        query=summary_query,
-        folder_index=folder_index,
-        llm=llm,
-        return_all=False,
-    )

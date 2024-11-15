@@ -4,6 +4,6 @@ services:
     build: .
     image: knowledge_gpt
     ports:
-      - "8501:8501"
+      - "8501:8501" #
     environment:
       - OPENAI_API_KEY=
