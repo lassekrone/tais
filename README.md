@@ -66,6 +66,13 @@ docker build -t knowledge_gpt .
 docker compose up
 ```
 
+After making changes you need to rerun
+
+```bash
+docker build -t knowledge_gpt .
+docker compose up
+```
+
 Open http://localhost:8501 in your browser to access the app.
 
 ## Customization
