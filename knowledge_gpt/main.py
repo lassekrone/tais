@@ -34,8 +34,7 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 
 
 st.set_page_config(page_title="T(AI)S", page_icon="📖", layout="wide")
-st.header("T(AI)S")
-
+# st.header("T(AI)S")
 
 # Enable caching for expensive functions
 bootstrap_caching()
@@ -52,9 +51,11 @@ uploaded_file = st.file_uploader(
 
 model = 'gpt-4' 
 
-with st.expander("Advanced Options"):
-    return_all_chunks = st.checkbox("Show all chunks retrieved from vector search")
-    show_full_doc = st.checkbox("Show parsed contents of the document")
+# with st.expander("Advanced Options"):
+#     return_all_chunks = st.checkbox("Show all chunks retrieved from vector search")
+#     show_full_doc = st.checkbox("Show parsed contents of the document")
+
+show_full_doc = False
 
 if not uploaded_file:
     st.stop()
@@ -164,7 +165,7 @@ if submit:
         result = query_folder(
             folder_index=folder_index,
             query=query,
-            return_all=return_all_chunks,
+            return_all=False,
             llm=llm,
         )
 
